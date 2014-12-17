@@ -15,15 +15,19 @@ endif()
 include(CheckCXXSourceCompiles)
 include(FindPackageHandleStandardArgs)
 
+set(CONFIG_H "${CMAKE_SOURCE_DIR}/src/main/cpp/config.h")
+
 if(MSVC)
     set(CXX11_FLAG_CANDIDATES
 	    " "
         )
 else()
     set(CXX11_FLAG_CANDIDATES
-        #gcc
-        "-std=gnu++11"
-        "-std=gnu++0x"
+        # C++14
+        "-std=c++14 -include ${CONFIG_H}"
+        "-std=c++1y -include ${CONFIG_H}"
+        "/Qstd=c++14"
+        "/Qstd=c++1y"
         #Gnu and Intel Linux
         "-std=c++11"
         "-std=c++0x"
@@ -32,6 +36,11 @@ else()
         #Intel windows
         "/Qstd=c++11"
         "/Qstd=c++0x"
+        # Try the GNU options last.
+        "-std=gnu++14 -include ${CONFIG_H}"
+        "-std=gnu++1y -include ${CONFIG_H}"
+        "-std=gnu++11"
+        "-std=gnu++0x"
         )
 endif()
 
@@ -40,8 +49,8 @@ set(CXX11_TEST_SOURCE
 int main()
 {
     int n[] = {4,7,6,1,2};
-	int r;
-	auto f = [&](int j) { r = j; };
+    int r;
+    auto f = [&](int j) { r = j; };
 	
     for (auto i : n)
         f(i);
