@@ -1,25 +1,49 @@
-package im.tox.tox4j;
+package im.tox.tox4j.spec;
 
+import im.tox.tox4j.ToxConstants;
+import im.tox.tox4j.ToxCore;
+import im.tox.tox4j.ToxOptions;
 import im.tox.tox4j.callbacks.*;
 import im.tox.tox4j.enums.ToxFileControl;
 import im.tox.tox4j.enums.ToxFileKind;
 import im.tox.tox4j.enums.ToxStatus;
 import im.tox.tox4j.exceptions.*;
+import im.tox.tox4j.spec.api.ObjectState;
+import im.tox.tox4j.spec.api.Specification;
+
+import java.util.List;
 
 /**
  * This class provides a formal specification of the semantics defined by the {@link ToxCore} interface. A transition
  * function will either complete fully or have no effect, so exceptions thrown in Java code means there was no change to
  * the program state.
  */
-public final class ToxCoreSpecification implements ToxCore {
+public final class ToxCoreSpecification implements ToxCore, Specification<ToxCore> {
 
-    public ToxCoreSpecification() {
+    private final ObjectState<ToxCoreSpecification> spec;
 
+    public ToxCoreSpecification(ObjectState<ToxCoreSpecification> spec) {
+        // Options is an input parameter, and we store it in a member.
+        spec.input("options", ToxOptions.class).toMember();
+
+        spec.member("port", Integer.class)
+                .range(1, 65535);
+        spec.member("dht_public_key", String.class)
+                .length(ToxConstants.CLIENT_ID_SIZE);
+        spec.member("dht_private_key", String.class)
+                .length(ToxConstants.CLIENT_ID_SIZE);
+        spec.member("client_public_key", String.class)
+                .length(ToxConstants.CLIENT_ID_SIZE);
+        spec.member("client_private_key", String.class)
+                .length(ToxConstants.CLIENT_ID_SIZE);
+
+        this.spec = spec.open();
     }
 
     @Override
     public void close() {
-
+        // This doesn't do any cleanup or disconnections, it just immediately invalidates the state.
+        spec.close();
 	}
 
     @Override
